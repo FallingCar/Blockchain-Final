@@ -3,7 +3,7 @@
 pragma solidity ^0.8.17;
 
 contract TaskCommissioner {
-    address owner;
+    address public owner;
     struct commission {
 
         //When initially posting a commission, these will be set:
@@ -76,7 +76,7 @@ contract TaskCommissioner {
     }
 
     function getContractBalance() public view returns (uint) {
-        return address(this).balance;  // This returns the Ether balance of the contract
+        return address(this).balance;  // This returns the balance of the contract
     }
     function verifyCommission(uint id) public{
         bool realID = false;
@@ -93,15 +93,13 @@ contract TaskCommissioner {
                 require(ListedCommissions[i].poster == msg.sender, "Only the poster can verify the commission");
                 require(!ListedCommissions[i].verified, "Commission already verified");
                 ListedCommissions[i].verified = true;
-                uint totalAmount = ListedCommissions[i].payout; //+ deposit[id];
-                //return totalAmount;
+                uint totalAmount = ListedCommissions[i].payout;
 
                 require(address(this).balance >= totalAmount, "Insufficient contract balance");
 
                 require(ListedCommissions[i].assigned != address(0), "No user assigned to this commission");
                 (bool sent, ) = ListedCommissions[i].assigned.call{value: totalAmount}("");
 
-                //bool sent = payable(ListedCommissions[i].assigned).send(totalAmount);
                 require(sent, "Failed to send funds to the assigned user");
 
                 for (uint k = i; k < ListedCommissions.length - 1; k++) {
